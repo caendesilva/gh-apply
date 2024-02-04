@@ -11,3 +11,5 @@ Then, run it, providing the URL to the patch file as the first argument.
 ```bash
 gh-apply https://github.com/user/repo/commit/2aae6c35c94fcfb415dbe95f408b9ce91ee846ed
 ```
+
+You can also add `--commit` to commit the changes.

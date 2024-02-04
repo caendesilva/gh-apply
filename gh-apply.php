@@ -63,13 +63,25 @@ function getInput(): string
     return $input;
 }
 
-function applyPatch(string $patch): int
+function shouldCommit(): bool
+{
+    global $argv;
+
+    return isset($argv[2]) && ($argv[2] === '--commit' || $argv[2] === '-c');
+}
+
+function applyPatch(string $patch, bool $commit = false): int
 {
     $patchFile = tempnam(sys_get_temp_dir(), 'patch');
 
     file_put_contents($patchFile, $patch);
 
-    $command = 'git apply '.escapeshellarg($patchFile);
+    if ($commit) {
+        // We need to use git am to apply the patch and commit it
+        $command = 'git am --signoff < '.escapeshellarg($patchFile);
+    } else {
+        $command = 'git apply '.escapeshellarg($patchFile);
+    }
 
     passthru($command, $exitCode);
 
@@ -91,9 +103,10 @@ function getPatch(string $input): string
 }
 
 $input = getInput();
+$commit = shouldCommit();
 
 $patch = getPatch($input);
 
-$exitCode = applyPatch($patch);
+$exitCode = applyPatch($patch, $commit);
 
 exit($exitCode);
