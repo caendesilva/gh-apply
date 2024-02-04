@@ -10,8 +10,15 @@
 
 declare(strict_types=1);
 
+if (PHP_SAPI !== 'cli') {
+    echo 'This script is meant to be run from the command line';
+    exit(1);
+}
+
 function getInput(): string
 {
+    global $argv;
+
     if (! isset($argv[1])) {
         echo 'No input provided';
         exit(1);
@@ -45,6 +52,12 @@ function getInput(): string
     if (! str_contains($input, '/commit/')) {
         $lastSlash = strrpos($input, '/');
         $input = substr($input, 0, $lastSlash).'/commit/'.substr($input, $lastSlash + 1);
+    }
+
+    // Validate the input format
+    if (! preg_match('/^https:\/\/github.com\/[^\/]+\/[^\/]+\/commit\/[0-9a-f]{40}\.patch$/', $input)) {
+        echo 'Invalid input format';
+        exit(1);
     }
 
     return $input;
